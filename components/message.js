@@ -1,3 +1,5 @@
+"use client";
+
 const Message = ({ user, color, children }) => {
     return (
         <div className={`flex flex-row items-start justify-between ${color}`}>

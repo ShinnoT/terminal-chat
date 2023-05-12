@@ -1,3 +1,5 @@
+"use client";
+
 const MessageInput = () => {
     return (
         <div className="flex flex-row items-center justify-between mt-2">
