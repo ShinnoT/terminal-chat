@@ -1,58 +1,78 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import { useContext, createContext, useState, useEffect } from "react";
 import io from "socket.io-client";
 
 // import supportsColor from "supports-color";
 
-const Context = createContext();
-const useConnection = () => useContext(Context);
+const ConnectionContext = createContext();
+const useConnection = () => useContext(ConnectionContext);
 
-const Provider = ({ children }) => {
+const ConnectionProvider = ({ children }) => {
     const [connection, setConnection] = useState(null);
+    // const [isAuthenticated, setIsAuthenticated] = useState(false);
+    // const pathName = usePathname();
+    // const router = useRouter();
 
     useEffect(() => {
-        socketInitializer();
+        // socketInitializer();
+        const socket = io("http://localhost:9000");
+        // socket.connect();
+
+        const connectionHandler = () => {
+            console.log("Client connected!");
+            console.log("User: ", socket.id);
+            setConnection(socket);
+        };
+
+        // const isAuthHandler = (data) => {
+        //     console.log("running isAuthenticated event handler.");
+        //     const { isAuth } = data;
+        //     setIsAuthenticated(isAuth);
+        //     // const pathName = usePathname();
+        //     console.log("pathName: ", pathName);
+        //     console.log("isAuth? ", isAuth);
+        //     if (pathName === "/chat" && !isAuth) router.push("/");
+        // };
+
+        socket.on("connect", connectionHandler);
+        // socket.on("isAuthenticated", isAuthHandler);
+
+        return () => {
+            socket.off("connect", connectionHandler);
+            // socket.off("isAuthenticated", isAuthHandler);
+            // socket.disconnect();
+        };
     }, []);
 
-    const socketInitializer = () => {
-        try {
-            // const res = await fetch("/api/socket");
-            // const data = await res.json();
+    // const socketInitializer = () => {
+    //     try {
+    //         // const res = await fetch("/api/socket");
+    //         // const data = await res.json();
 
-            // if (!res.ok) throw new Error(`${res?.status}: ${data?.error}`);
+    //         // if (!res.ok) throw new Error(`${res?.status}: ${data?.error}`);
 
-            // console.log("api call successfull: ", res?.status, data);
-            // // ---------------------------------------------------------------------------------------
-            // const socket = io(undefined, {
-            //     path: "/api/socket",
-            //     autoConnect: false,
-            //     transports: ["polling", "websocket"],
-            // });
+    //         // console.log("api call successfull: ", res?.status, data);
+    //         // // ---------------------------------------------------------------------------------------
+    //         // const socket = io(undefined, {
+    //         //     path: "/api/socket",
+    //         //     autoConnect: false,
+    //         //     transports: ["polling", "websocket"],
+    //         // });
 
-            const socket = io("http://localhost:9000");
-            socket.connect();
-
-            const connectionHandler = () => {
-                console.log("Client connected!");
-                setConnection(socket);
-            };
-
-            socket.on("connect", connectionHandler);
-
-            return () => {
-                socket.off("connect", connectionHandler);
-                socket.disconnect();
-            };
-            // ---------------------------------------------------------------------------------------
-        } catch (error) {
-            console.log("there was an error calling the API: ", error);
-        }
-    };
+    //         // ---------------------------------------------------------------------------------------
+    //     } catch (error) {
+    //         console.log("there was an error calling the API: ", error);
+    //     }
+    // };
 
     return (
-        <Context.Provider value={{ connection }}>{children}</Context.Provider>
+        <ConnectionContext.Provider value={{ connection }}>
+            {children}
+        </ConnectionContext.Provider>
     );
 };
 
-export { Context as default, useConnection, Provider };
+// NOTE: useConnection use case: const { connection } = useConnection()
+export { useConnection, ConnectionProvider as default };

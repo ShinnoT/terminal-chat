@@ -1,6 +1,9 @@
 import "./globals.css";
 import { VT323 } from "next/font/google";
-import { Provider as ConnectionProvider } from "@/context/connect";
+
+import ConnectionProvider from "@/context/connect";
+import AuthProvider from "@/context/authentication";
+import PrivateRoute from "@/context/private-route";
 
 // import "supports-color";
 
@@ -12,12 +15,20 @@ const metadata = {
 };
 
 const RootLayout = ({ children }) => {
+    const protectedRoutes = ["/chat"];
+
     return (
-        <ConnectionProvider>
-            <html lang="en">
-                <body className={typewriter.className}>{children}</body>
-            </html>
-        </ConnectionProvider>
+        <html lang="en">
+            <body className={typewriter.className}>
+                <ConnectionProvider>
+                    <AuthProvider>
+                        <PrivateRoute protectedRoutes={protectedRoutes}>
+                            {children}
+                        </PrivateRoute>
+                    </AuthProvider>
+                </ConnectionProvider>
+            </body>
+        </html>
     );
 };
 
