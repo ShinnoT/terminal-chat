@@ -40,6 +40,11 @@ const reducer = (state, { type, payload }) => {
                 ...state,
                 loading: false,
             };
+        case "START_LOADING":
+            return {
+                ...state,
+                loading: true,
+            };
         default:
             throw new Error(`Unknown action type: ${type}`);
     }
@@ -56,7 +61,9 @@ const AuthProvider = ({ children }) => {
         loading: true,
     });
 
-    const dispatch = (type, payload) => defaultDispatch({ type, payload });
+    const dispatch = (type, payload) =>
+        console.log(`${type} dispatch called.`) ||
+        defaultDispatch({ type, payload });
 
     useEffect(() => {
         if (connection) {

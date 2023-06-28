@@ -18,15 +18,6 @@ const LoginForm = () => {
         );
     };
 
-    useEffect(() => {
-        if (connection) {
-            const userHandler = (data) => data && router.push("/chat");
-            connection.emit("fetchUser");
-            connection.on("user", userHandler);
-            return () => connection.off("user", userHandler);
-        }
-    }, []);
-
     return (
         <form
             className="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4"
@@ -44,6 +35,7 @@ const LoginForm = () => {
                     id="username"
                     type="text"
                     placeholder="E.g. sn9x55"
+                    autoFocus="autofocus"
                     maxLength={8}
                 />
                 <p className="text-gray-600 text-xs">

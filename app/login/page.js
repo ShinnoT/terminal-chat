@@ -1,6 +1,6 @@
 import LoginForm from "@/components/login";
 
-const Page = () => {
+const LoginPage = () => {
     return (
         <main className="flex h-screen flex-col items-center justify-center p-3 md:p-12">
             <div className="w-full max-w-xs">
@@ -14,4 +14,4 @@ const Page = () => {
     );
 };
 
-export default Page;
+export default LoginPage;

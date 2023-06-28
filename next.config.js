@@ -15,6 +15,7 @@ module.exports = {
         { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }
     ) => {
         // Important: return the modified config
+        // used for import error of below modules not complying with es6
         if (isServer) {
             config.externals.push({
                 bufferutil: "bufferutil",
