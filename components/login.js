@@ -8,22 +8,28 @@ import InputField from "./subcomponents/input";
 const LoginForm = () => {
     const { connection } = useConnection();
     const router = useRouter();
-    let [error, setError] = useState(null);
+    let [usernameError, setUsernameError] = useState(null);
+    let [roomIdError, setRoomIdError] = useState(null);
+    let [roomPasswordError, setRoomPasswordError] = useState(null);
 
     const handleSubmit = (event) => {
         event.preventDefault();
         const { username, room_id, room_password } = event?.target;
-        // connection.emit("login", {
-        //     username: username?.value,
-        //     room_id: room_id?.value,
-        //     room_password: room_password?.value,
-        // });
         connection.emit("login", {
             username: username?.value,
+            room_id: room_id?.value,
+            room_password: room_password?.value,
         });
-        connection.on("login", (data) =>
-            data?.success ? router.push("/chat") : setError(data?.error)
-        );
+        connection.on("login", (data) => {
+            const { success } = data;
+            if (success) router.push("/chat");
+            if (!success) {
+                const { error } = data;
+                setUsernameError(error?.usernameError);
+                setRoomIdError(error?.roomIdError);
+                setRoomPasswordError(error?.roomPasswordError);
+            }
+        });
     };
 
     return (
@@ -39,7 +45,7 @@ const LoginForm = () => {
                 placeholder="E.g. sn9x55"
                 maxLength={8}
                 inputLabel="Maximum of 8 characters."
-                error={error}
+                error={usernameError}
             />
             <InputField
                 requiredClass="required"
@@ -49,7 +55,7 @@ const LoginForm = () => {
                 placeholder="E.g. FreedomChat99"
                 maxLength={20}
                 inputLabel="Maximum of 20 characters."
-                error={error}
+                error={roomIdError}
             />
             <InputField
                 requiredClass="required"
@@ -59,7 +65,7 @@ const LoginForm = () => {
                 placeholder="E.g. _69helloworld"
                 maxLength={8}
                 inputLabel="Maximum of 8 characters."
-                error={error}
+                error={roomPasswordError}
             />
             <InputField
                 requiredClass="optional"
@@ -69,7 +75,7 @@ const LoginForm = () => {
                 placeholder="E.g. 3"
                 maxLength={10}
                 inputLabel="Leave empty for no limit."
-                error={error}
+                error={null}
                 disabled={true}
             />
             <div className="flex items-center justify-center">
