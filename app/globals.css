@@ -51,3 +51,19 @@ body {
         )
         rgb(var(--background-start-rgb));
 }
+
+/* custom classes */
+.required::after {
+    content: " *";
+    color: red;
+    font-size: x-small;
+    vertical-align: middle;
+}
+
+.optional::after {
+    content: " (optional)";
+    color: gray;
+    /* font-style: italic; */
+    font-size: x-small;
+    vertical-align: middle;
+}

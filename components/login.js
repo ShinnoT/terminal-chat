@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useConnection } from "@/context/connect";
 import { useRouter } from "next/navigation";
+import InputField from "./subcomponents/input";
 
 const LoginForm = () => {
     const { connection } = useConnection();
@@ -11,8 +12,15 @@ const LoginForm = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        const username = event?.target?.username?.value;
-        connection.emit("login", { username });
+        const { username, room_id, room_password } = event?.target;
+        // connection.emit("login", {
+        //     username: username?.value,
+        //     room_id: room_id?.value,
+        //     room_password: room_password?.value,
+        // });
+        connection.emit("login", {
+            username: username?.value,
+        });
         connection.on("login", (data) =>
             data?.success ? router.push("/chat") : setError(data?.error)
         );
@@ -23,35 +31,50 @@ const LoginForm = () => {
             className="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4"
             onSubmit={handleSubmit}
         >
-            <div>
-                <label
-                    className="block text-green-500 tracking-widest font-bold text-base mb-2"
-                    htmlFor="username"
-                >
-                    Username
-                </label>
-                <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 mb-1.5 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="username"
-                    type="text"
-                    placeholder="E.g. sn9x55"
-                    autoFocus="autofocus"
-                    maxLength={8}
-                />
-                <p className="text-gray-600 text-xs">
-                    Maximum of 7 characters.
-                </p>
-            </div>
-            <div className="mb-5 h-2">
-                {error && (
-                    <span className="flex items-center font-medium tracking-wide text-red-500 text-sm">
-                        {error}
-                    </span>
-                )}
-            </div>
+            <InputField
+                requiredClass="required"
+                fieldLabel="username"
+                autofocus={true}
+                inputType="text"
+                placeholder="E.g. sn9x55"
+                maxLength={8}
+                inputLabel="Maximum of 8 characters."
+                error={error}
+            />
+            <InputField
+                requiredClass="required"
+                fieldLabel="room_id"
+                autofocus={false}
+                inputType="text"
+                placeholder="E.g. FreedomChat99"
+                maxLength={20}
+                inputLabel="Maximum of 20 characters."
+                error={error}
+            />
+            <InputField
+                requiredClass="required"
+                fieldLabel="room_password"
+                autofocus={false}
+                inputType="password"
+                placeholder="E.g. _69helloworld"
+                maxLength={8}
+                inputLabel="Maximum of 8 characters."
+                error={error}
+            />
+            <InputField
+                requiredClass="optional"
+                fieldLabel="room_members_limit"
+                autofocus={false}
+                inputType="number"
+                placeholder="E.g. 3"
+                maxLength={10}
+                inputLabel="Leave empty for no limit."
+                error={error}
+                disabled={true}
+            />
             <div className="flex items-center justify-center">
                 <button
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold tracking-wide py-1 px-6 rounded focus:outline-none focus:shadow-outline"
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold tracking-wide mt-3 py-1 px-6 rounded focus:outline-none focus:shadow-outline"
                     type="submit"
                 >
                     Sign In
