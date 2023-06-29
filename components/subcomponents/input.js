@@ -32,7 +32,7 @@ const InputField = ({
                 <div className="mb-4 h-2">
                     {error && (
                         <span className="flex items-center font-medium tracking-wide text-red-500 text-xs">
-                            ⌧ {error}
+                            {error}
                         </span>
                     )}
                 </div>

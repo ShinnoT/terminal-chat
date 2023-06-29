@@ -1,92 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useConnection } from "@/context/connect";
-import { useRouter } from "next/navigation";
-import InputField from "./subcomponents/input";
+import { useState } from "react";
+import LoginTabs from "./subcomponents/login-tabs";
+import JoinRoom from "./subcomponents/join-room";
+import CreateRoom from "./subcomponents/create-room";
 
 const LoginForm = () => {
-    const { connection } = useConnection();
-    const router = useRouter();
-    let [usernameError, setUsernameError] = useState(null);
-    let [roomIdError, setRoomIdError] = useState(null);
-    let [roomPasswordError, setRoomPasswordError] = useState(null);
+    const [activeTab, setActiveTab] = useState("tab1");
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const { username, room_id, room_password } = event?.target;
-        connection.emit("login", {
-            username: username?.value,
-            room_id: room_id?.value,
-            room_password: room_password?.value,
-        });
-        connection.on("login", (data) => {
-            const { success } = data;
-            if (success) router.push("/chat");
-            if (!success) {
-                const { error } = data;
-                setUsernameError(error?.usernameError);
-                setRoomIdError(error?.roomIdError);
-                setRoomPasswordError(error?.roomPasswordError);
-            }
-        });
-    };
+    const handleActiveTab = (tabName) => setActiveTab(tabName);
 
     return (
-        <form
-            className="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4"
-            onSubmit={handleSubmit}
-        >
-            <InputField
-                requiredClass="required"
-                fieldLabel="username"
-                autofocus={true}
-                inputType="text"
-                placeholder="E.g. sn9x55"
-                maxLength={8}
-                inputLabel="Maximum of 8 characters."
-                error={usernameError}
+        <>
+            <LoginTabs
+                activeTab={activeTab}
+                handleActiveTab={handleActiveTab}
             />
-            <InputField
-                requiredClass="required"
-                fieldLabel="room_id"
-                autofocus={false}
-                inputType="text"
-                placeholder="E.g. FreedomChat99"
-                maxLength={20}
-                inputLabel="Maximum of 20 characters."
-                error={roomIdError}
-            />
-            <InputField
-                requiredClass="required"
-                fieldLabel="room_password"
-                autofocus={false}
-                inputType="password"
-                placeholder="E.g. _69helloworld"
-                maxLength={8}
-                inputLabel="Maximum of 8 characters."
-                error={roomPasswordError}
-            />
-            <InputField
-                requiredClass="optional"
-                fieldLabel="room_members_limit"
-                autofocus={false}
-                inputType="number"
-                placeholder="E.g. 3"
-                maxLength={10}
-                inputLabel="Leave empty for no limit."
-                error={null}
-                disabled={true}
-            />
-            <div className="flex items-center justify-center">
-                <button
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold tracking-wide mt-3 py-1 px-6 rounded focus:outline-none focus:shadow-outline"
-                    type="submit"
-                >
-                    Sign In
-                </button>
-            </div>
-        </form>
+            {activeTab === "tab1" ? <CreateRoom /> : <JoinRoom />}
+        </>
     );
 };
 

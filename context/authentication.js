@@ -73,10 +73,13 @@ const AuthProvider = ({ children }) => {
                         "running login event handler in AuthenticationContext."
                     );
                     const { success } = data;
-                    if (success) dispatch("LOGIN", data?.user);
+                    if (success) {
+                        setTimeout(() => {
+                            dispatch("LOGIN", data?.user);
+                        }, 500);
+                    }
                 };
 
-                // connection.emit("login", { username: null });
                 connection.on("login", loginHandler);
 
                 return () => {
