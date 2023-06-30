@@ -2,44 +2,46 @@
 
 import { useState } from "react";
 import { useConnection } from "@/context/connect";
-import { useRouter } from "next/navigation";
 import InputField from "./input";
 
 const JoinRoom = () => {
     console.log("Join Room Form.");
     const { connection } = useConnection();
-    const router = useRouter();
     const [usernameError, setUsernameError] = useState(null);
     const [roomIdError, setRoomIdError] = useState(null);
     const [roomPasswordError, setRoomPasswordError] = useState(null);
+
+    const setCheckMarks = () => {
+        setUsernameError("✔️");
+        setRoomIdError("✔️");
+        setRoomPasswordError("✔️");
+    };
+
+    const setUserErrors = ({
+        usernameError,
+        roomIdError,
+        roomPasswordError,
+    }) => {
+        setUsernameError(usernameError || "✔️");
+        setRoomIdError(roomIdError || "✔️");
+        setRoomPasswordError(roomPasswordError || "✔️");
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
         const { username, room_id, room_password } = event?.target;
         connection.emit("login", {
-            username: username?.value,
-            room_id: room_id?.value,
-            room_password: room_password?.value,
+            requestType: "JOIN",
+            formData: {
+                username: username?.value,
+                room_id: room_id?.value,
+                room_password: room_password?.value,
+            },
         });
         connection.on("login", (data) => {
             const { success } = data;
-            if (success) {
-                setUsernameError("✔️");
-                setRoomIdError("✔️");
-                setRoomPasswordError("✔️");
-                // settimeout used so that user can see login for displayed all checkmarks before routing
-                // also settimeout used in context/authentication.js before calling "LOGIN" dispatch on success
-                // NOTE: logic below can be moved to context/authentication.js after success event????
-                setTimeout(() => {
-                    router.push("/chat");
-                }, 500);
-            }
-            if (!success) {
-                const { error } = data;
-                setUsernameError(error?.usernameError || "✔️");
-                setRoomIdError(error?.roomIdError || "✔️");
-                setRoomPasswordError(error?.roomPasswordError || "✔️");
-            }
+            // NOTE: routing to "/chat" logic moved to context/authenticate.js
+            success ? setCheckMarks() : setUserErrors(data?.error);
         });
     };
 
@@ -77,17 +79,6 @@ const JoinRoom = () => {
                 maxLength={8}
                 inputLabel="Maximum of 8 characters."
                 error={roomPasswordError}
-            />
-            <InputField
-                requiredClass="optional"
-                fieldLabel="room_members_limit"
-                autofocus={false}
-                inputType="number"
-                placeholder="E.g. 3"
-                maxLength={10}
-                inputLabel="Leave empty for no limit."
-                error={null}
-                disabled={true}
             />
             <div className="flex items-center justify-center">
                 <button

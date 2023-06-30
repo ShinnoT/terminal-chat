@@ -74,8 +74,11 @@ const AuthProvider = ({ children }) => {
                     );
                     const { success } = data;
                     if (success) {
+                        // NOTE: 0.5s delay so user can see check marks on login form
+                        // NOTE: `router.push("/chat")` logic used to be in login form
                         setTimeout(() => {
                             dispatch("LOGIN", data?.user);
+                            router.push("/chat");
                         }, 500);
                     }
                 };
