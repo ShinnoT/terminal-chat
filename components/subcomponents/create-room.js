@@ -76,8 +76,9 @@ const CreateRoom = () => {
                 autofocus={false}
                 inputType="password"
                 placeholder="E.g. _69helloworld"
-                maxLength={8}
-                inputLabel="Maximum of 8 characters."
+                maxLength={16}
+                minLength={8}
+                inputLabel="Between 8 to 16 characters."
                 error={roomPasswordError}
             />
             <InputField

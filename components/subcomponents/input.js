@@ -5,6 +5,7 @@ const InputField = ({
     inputType,
     placeholder,
     maxLength,
+    minLength,
     inputLabel,
     error,
     disabled,
@@ -26,6 +27,7 @@ const InputField = ({
                         placeholder={placeholder}
                         {...(autofocus && { autoFocus: "autofocus" })}
                         maxLength={maxLength}
+                        {...(minLength && { minLength })}
                     />
                     <p className="text-gray-600 text-xs">{inputLabel}</p>
                 </div>
