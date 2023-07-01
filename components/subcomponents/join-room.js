@@ -56,8 +56,8 @@ const JoinRoom = () => {
                 autofocus={true}
                 inputType="text"
                 placeholder="E.g. sn9x55"
-                maxLength={8}
-                inputLabel="Maximum of 8 characters."
+                maxLength={7}
+                inputLabel="Maximum of 7 characters."
                 error={usernameError}
             />
             <InputField

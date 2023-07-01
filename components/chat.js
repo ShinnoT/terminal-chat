@@ -26,9 +26,7 @@ const Chat = () => {
     useEffect(() => {
         if (connection) {
             const userHandler = ({ username, room_id, user_type }) => {
-                console.log("USER TYPE:: ", user_type);
                 // NOTE: only send below message if user is ADMIN
-
                 if (user_type === "ADMIN")
                     connection.emit("sendMessage", {
                         username,
