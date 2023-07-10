@@ -6,8 +6,8 @@ const Screenshots = () => {
     return (
         <>
             <div className="mt-16 lg:mt-28 flex flex-col lg:flex-row items-center justify-evenly w-full">
-                <div className="w-full lg:w-4/12 flex flex-col justify-around items-start">
-                    <h3 className="text-lime-500">
+                <div className="w-full lg:w-4/12 flex flex-col justify-around items-center lg:items-start">
+                    <h3 className="text-lime-500 text-center lg:text-left">
                         Anonymous Group Chats: Connect Privately
                     </h3>
                     <p className="mt-2 text-justify text-sm">
@@ -23,8 +23,8 @@ const Screenshots = () => {
                 />
             </div>
             <div className="mt-20 lg:mt-28 flex flex-col lg:flex-row-reverse items-center justify-evenly w-full">
-                <div className="w-full lg:w-4/12 flex flex-col justify-around items-start">
-                    <h3 className="text-lime-500">
+                <div className="w-full lg:w-4/12 flex flex-col justify-around items-center lg:items-start">
+                    <h3 className="text-lime-500 text-center lg:text-left">
                         Secure Messaging at Your Fingertips
                     </h3>
                     <p className="mt-2 text-justify text-sm">

@@ -1,10 +1,13 @@
 import Chat from "@/components/chat";
+import Encryptor from "@/context/encrypt";
 
 const ChatPage = () => {
     return (
-        <main className="h-screen p-3 md:p-6">
-            <Chat />
-        </main>
+        <Encryptor>
+            <main className="h-screen p-3 md:p-6">
+                <Chat />
+            </main>
+        </Encryptor>
     );
 };
 
