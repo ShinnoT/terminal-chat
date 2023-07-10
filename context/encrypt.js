@@ -11,9 +11,7 @@ import {
     importKey,
 } from "@/helpers/encryption";
 
-const EncryptionContext = createContext({
-    secretKey: null,
-});
+const EncryptionContext = createContext(null);
 
 const Encryptor = ({ children }) => {
     const { connection } = useConnection();
@@ -32,8 +30,11 @@ const Encryptor = ({ children }) => {
             connection.emit("sendMessage", {
                 username: user.username,
                 room_id: user.room_id,
-                message:
-                    "chat not encrypted - waiting for other user to connect in order to generate ECDH secrety encryption keys.",
+                message: {
+                    encrypted: false,
+                    value: "chat not encrypted - waiting for other user to connect in order to generate ECDH secret encryption keys.",
+                    iv: null,
+                },
             });
     };
 
@@ -62,8 +63,11 @@ const Encryptor = ({ children }) => {
         connection.emit("sendMessage", {
             username: user.username,
             room_id: user.room_id,
-            message:
-                "public keys exchanged - end-to-end encryption initialized.",
+            message: {
+                encrypted: false,
+                value: "public keys exchanged - end-to-end encryption initialized.",
+                iv: null,
+            },
         });
     };
 
@@ -90,7 +94,6 @@ const Encryptor = ({ children }) => {
         }
 
         return () => {
-            // TODO: disconnect event listeners
             connection.off("roomDetails", roomDetailsHandler);
             connection.off("initializeEncryption", initializeEncryption);
             connection.off("finalizeEncryption", finalizeEncryption);

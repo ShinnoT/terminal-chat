@@ -4,22 +4,51 @@ import Message from "./subcomponents/message";
 import MessageInput from "./subcomponents/message-input";
 
 import { useConnection } from "@/context/connect";
+import { useEncryptionKey } from "@/context/encrypt";
 import { useState, useEffect } from "react";
+
+import { generateIV, encrypt, decrypt } from "@/helpers/encryption";
 
 const Chat = () => {
     const { connection } = useConnection();
+    const secretKey = useEncryptionKey();
     const [currentUser, setCurrentUser] = useState(null);
     const [roomId, setRoomId] = useState(null);
     const [messages, setMessages] = useState([]);
 
-    const handleNewMessage = (event) => {
+    const handleNewMessage = async (event) => {
         event.preventDefault();
         const { message } = event?.target;
-        connection.emit("sendMessage", {
-            username: currentUser,
-            room_id: roomId,
-            message: message?.value,
-        });
+        if (message?.value) {
+            if (secretKey) {
+                const iv = generateIV();
+                const encryptedMessage = await encrypt({
+                    secretKey,
+                    iv,
+                    message: message?.value,
+                });
+                connection.emit("sendMessage", {
+                    username: currentUser,
+                    room_id: roomId,
+                    message: {
+                        encrypted: true,
+                        value: encryptedMessage,
+                        iv,
+                    },
+                });
+            }
+            if (!secretKey) {
+                connection.emit("sendMessage", {
+                    username: currentUser,
+                    room_id: roomId,
+                    message: {
+                        encrypted: false,
+                        value: message?.value,
+                        iv: null,
+                    },
+                });
+            }
+        }
         event?.target?.reset();
     };
 
@@ -31,21 +60,48 @@ const Chat = () => {
                     connection.emit("sendMessage", {
                         username,
                         room_id,
-                        message: `created room ${room_id} and is now connected.`,
+                        message: {
+                            encrypted: false,
+                            value: `created room ${room_id} and is now connected.`,
+                            iv: null,
+                        },
                     });
                 setCurrentUser(username) || setRoomId(room_id);
             };
-            const messageHandler = (message) =>
-                setMessages((prev) => [...prev, message]);
-            connection.emit("fetchUser");
-            connection.on("user", userHandler);
+            const messageHandler = async ({ username, message }) => {
+                const { encrypted, value, iv } = message;
+                if (encrypted && secretKey) {
+                    console.log("encrypted message:: ", encrypted);
+                    console.log("secret key:: ", secretKey);
+                    console.log("iv:: ", iv);
+                    const decryptedMessage = await decrypt({
+                        secretKey,
+                        iv,
+                        message: value,
+                    });
+                    setMessages((prev) => [
+                        ...prev,
+                        { username, message: decryptedMessage },
+                    ]);
+                }
+                if (!encrypted) {
+                    setMessages((prev) => [
+                        ...prev,
+                        { username, message: value },
+                    ]);
+                }
+            };
+            if (!secretKey) {
+                connection.emit("fetchUser");
+                connection.on("user", userHandler);
+            }
             connection.on("message", messageHandler);
             return () => {
                 connection.off("user", userHandler);
                 connection.off("message", messageHandler);
             };
         }
-    }, [connection]);
+    }, [connection, secretKey]);
 
     return (
         <div className="flex h-full p-2 flex-col items-left justify-between bg-gray-900 rounded">
