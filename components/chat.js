@@ -6,6 +6,7 @@ import MessageInput from "./subcomponents/message-input";
 import { useConnection } from "@/context/connect";
 import { useEncryptionKey } from "@/context/encrypt";
 import { useState, useEffect } from "react";
+import { sanitize } from "dompurify";
 
 import { generateIV, encrypt, decrypt } from "@/helpers/encryption";
 
@@ -19,13 +20,15 @@ const Chat = () => {
     const handleNewMessage = async (event) => {
         event.preventDefault();
         const { message } = event?.target;
-        if (message?.value) {
+        const sanitizedMessage = sanitize(message?.value);
+
+        if (sanitizedMessage) {
             if (secretKey) {
                 const iv = generateIV();
                 const encryptedMessage = await encrypt({
                     secretKey,
                     iv,
-                    message: message?.value,
+                    message: sanitizedMessage,
                 });
                 connection.emit("sendMessage", {
                     username: currentUser,
@@ -43,7 +46,7 @@ const Chat = () => {
                     room_id: roomId,
                     message: {
                         encrypted: false,
-                        value: message?.value,
+                        value: sanitizedMessage,
                         iv: null,
                     },
                 });

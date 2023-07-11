@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { sanitize } from "dompurify";
+
 import { useConnection } from "@/context/connect";
 import InputField from "./input";
 
@@ -30,12 +32,18 @@ const CreateRoom = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
         const { username, room_id, room_password } = event?.target;
+        const [sanitizedUsername, sanitizedRoomId, sanitizedPassword] = [
+            sanitize(username?.value),
+            sanitize(room_id?.value),
+            sanitize(room_password?.value),
+        ];
+
         connection.emit("login", {
             requestType: "CREATE",
             formData: {
-                username: username?.value,
-                room_id: room_id?.value,
-                room_password: room_password?.value,
+                username: sanitizedUsername,
+                room_id: sanitizedRoomId,
+                room_password: sanitizedPassword,
             },
         });
         connection.on("login", (data) => {
