@@ -5,7 +5,7 @@ import MessageInput from "./subcomponents/message-input";
 
 import { useConnection } from "@/context/connect";
 import { useEncryptionKey } from "@/context/encrypt";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { sanitize } from "dompurify";
 
 import { generateIV, encrypt, decrypt } from "@/helpers/encryption";
@@ -16,6 +16,9 @@ const Chat = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [roomId, setRoomId] = useState(null);
     const [messages, setMessages] = useState([]);
+
+    const chatbox = useRef(null);
+    useEffect(() => chatbox.current.scrollIntoView(false), [messages]);
 
     const handleNewMessage = async (event) => {
         event.preventDefault();
@@ -113,20 +116,22 @@ const Chat = () => {
                 Room ::: {roomId}
             </h1>
             <div className="h-full overflow-y-auto bg-gray-800 rounded">
-                {messages &&
-                    messages.map(({ username, message }, i) => (
-                        <Message
-                            key={i}
-                            user={username}
-                            color={
-                                username === currentUser
-                                    ? "text-green-700"
-                                    : "text-green-400"
-                            }
-                        >
-                            {message}
-                        </Message>
-                    ))}
+                <div ref={chatbox}>
+                    {messages &&
+                        messages.map(({ username, message }, i) => (
+                            <Message
+                                key={i}
+                                user={username}
+                                color={
+                                    username === currentUser
+                                        ? "text-green-700"
+                                        : "text-green-400"
+                                }
+                            >
+                                {message}
+                            </Message>
+                        ))}
+                </div>
             </div>
             <MessageInput handleNewMessage={handleNewMessage} />
         </div>
