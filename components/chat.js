@@ -59,6 +59,7 @@ const Chat = () => {
         if (connection) {
             const userHandler = ({ username, room_id, user_type }) => {
                 // NOTE: only send below message if user is ADMIN
+                // TODO: move this below message out of this useEffect and create another useEffect that runs only on ComponentDidMount
                 if (user_type === "ADMIN")
                     connection.emit("sendMessage", {
                         username,

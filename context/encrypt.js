@@ -71,6 +71,9 @@ const Encryptor = ({ children }) => {
         });
     };
 
+    const disableEncryption = () =>
+        setPrivateKey(null) || setPersonalPublicKey(null) || setSecretKey(null);
+
     useEffect(() => {
         if (connection) {
             if (authenticated) {
@@ -89,6 +92,7 @@ const Encryptor = ({ children }) => {
                     connection.on("roomDetails", roomDetailsHandler);
                     connection.on("initializeEncryption", initializeEncryption);
                     connection.on("finalizeEncryption", finalizeEncryption);
+                    connection.on("disableEncryption", disableEncryption);
                 }
             }
         }
@@ -97,6 +101,7 @@ const Encryptor = ({ children }) => {
             connection.off("roomDetails", roomDetailsHandler);
             connection.off("initializeEncryption", initializeEncryption);
             connection.off("finalizeEncryption", finalizeEncryption);
+            connection.off("disableEncryption", disableEncryption);
         };
     }, [connection, privateKey, personalPublicKey]);
 
