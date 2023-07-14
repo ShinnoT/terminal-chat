@@ -14,11 +14,10 @@ const Chat = () => {
     const { connection } = useConnection();
     const secretKey = useEncryptionKey();
     const [currentUser, setCurrentUser] = useState(null);
+    const [othersInRoom, setOthersInRoom] = useState(["none"]);
     const [roomId, setRoomId] = useState(null);
     const [messages, setMessages] = useState([]);
-
     const chatbox = useRef(null);
-    useEffect(() => chatbox.current.scrollIntoView(false), [messages]);
 
     const handleNewMessage = async (event) => {
         event.preventDefault();
@@ -37,6 +36,7 @@ const Chat = () => {
                     username: currentUser,
                     room_id: roomId,
                     message: {
+                        type: "message",
                         encrypted: true,
                         value: encryptedMessage,
                         iv,
@@ -48,6 +48,7 @@ const Chat = () => {
                     username: currentUser,
                     room_id: roomId,
                     message: {
+                        type: "message",
                         encrypted: false,
                         value: sanitizedMessage,
                         iv: null,
@@ -58,55 +59,88 @@ const Chat = () => {
         event?.target?.reset();
     };
 
+    const userHandler = ({ username, room_id, user_type }) => {
+        // NOTE: only send below message if user is ADMIN
+        // TODO: move this below message out of this useEffect and create another useEffect that runs only on ComponentDidMount
+        connection.emit("loggingMessage", {
+            username,
+            room_id,
+            message: {
+                type: "log",
+                encrypted: false,
+                value: `${
+                    user_type === "ADMIN" ? "created" : "joined"
+                } room ${room_id} ::: [ connection established ]`,
+                iv: null,
+            },
+        });
+        setCurrentUser(username) || setRoomId(room_id);
+    };
+
+    const allOtherUsersHandler = ({ user, allUsersInRoom }) => {
+        const { username, room_id } = user;
+        const styledUsers = allUsersInRoom.map((username) => `@${username}`);
+
+        if (othersInRoom.toString() !== allUsersInRoom.toString()) {
+            connection.emit("loggingMessage", {
+                username,
+                room_id,
+                message: {
+                    type: "log",
+                    encrypted: false,
+                    value: `connected in room ::: [ ${
+                        allUsersInRoom.length ? styledUsers.join(", ") : "null"
+                    } ]`,
+                    iv: null,
+                },
+            });
+            setOthersInRoom(allUsersInRoom);
+        }
+    };
+
+    const messageHandler = async ({ username, message }) => {
+        const { type, encrypted, value, iv } = message;
+        if (encrypted && secretKey) {
+            const decryptedMessage = await decrypt({
+                secretKey,
+                iv,
+                message: value,
+            });
+            setMessages((prev) => [
+                ...prev,
+                { username, message: decryptedMessage, type },
+            ]);
+        }
+        if (!encrypted) {
+            setMessages((prev) => [
+                ...prev,
+                { username, message: value, type },
+            ]);
+        }
+    };
+
+    useEffect(() => chatbox.current.scrollIntoView(false), [messages]);
+
     useEffect(() => {
         if (connection) {
-            const userHandler = ({ username, room_id, user_type }) => {
-                // NOTE: only send below message if user is ADMIN
-                // TODO: move this below message out of this useEffect and create another useEffect that runs only on ComponentDidMount
-                if (user_type === "ADMIN")
-                    connection.emit("sendMessage", {
-                        username,
-                        room_id,
-                        message: {
-                            encrypted: false,
-                            value: `created room ${room_id} and is now connected.`,
-                            iv: null,
-                        },
-                    });
-                setCurrentUser(username) || setRoomId(room_id);
-            };
-            const messageHandler = async ({ username, message }) => {
-                const { encrypted, value, iv } = message;
-                if (encrypted && secretKey) {
-                    console.log("encrypted message:: ", encrypted);
-                    console.log("secret key:: ", secretKey);
-                    console.log("iv:: ", iv);
-                    const decryptedMessage = await decrypt({
-                        secretKey,
-                        iv,
-                        message: value,
-                    });
-                    setMessages((prev) => [
-                        ...prev,
-                        { username, message: decryptedMessage },
-                    ]);
-                }
-                if (!encrypted) {
-                    setMessages((prev) => [
-                        ...prev,
-                        { username, message: value },
-                    ]);
-                }
-            };
-            if (!secretKey) {
-                connection.emit("fetchUser");
-                connection.on("user", userHandler);
-            }
+            connection.emit("fetchUser");
+            connection.on("user", userHandler);
+            return () => connection.off("user", userHandler);
+        }
+    }, [connection]);
+
+    useEffect(() => {
+        if (connection) {
+            connection.emit("fetchAllOtherUsers");
+            connection.on("allOtherUsers", allOtherUsersHandler);
+            return () => connection.off("allOtherUsers", allOtherUsersHandler);
+        }
+    }, [connection, othersInRoom]);
+
+    useEffect(() => {
+        if (connection) {
             connection.on("message", messageHandler);
-            return () => {
-                connection.off("user", userHandler);
-                connection.off("message", messageHandler);
-            };
+            return () => connection.off("message", messageHandler);
         }
     }, [connection, secretKey]);
 
@@ -118,10 +152,11 @@ const Chat = () => {
             <div className="h-full overflow-y-auto bg-gray-800 rounded">
                 <div ref={chatbox}>
                     {messages &&
-                        messages.map(({ username, message }, i) => (
+                        messages.map(({ username, message, type }, i) => (
                             <Message
                                 key={i}
                                 user={username}
+                                messageType={type}
                                 color={
                                     username === currentUser
                                         ? "text-green-700"

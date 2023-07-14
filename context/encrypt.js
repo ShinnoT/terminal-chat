@@ -27,10 +27,11 @@ const Encryptor = ({ children }) => {
 
     const roomDetailsHandler = ({ userCount }) => {
         if (userCount < 2)
-            connection.emit("sendMessage", {
+            connection.emit("loggingMessage", {
                 username: user.username,
                 room_id: user.room_id,
                 message: {
+                    type: "log",
                     encrypted: false,
                     value: "chat not encrypted - waiting for other user to connect in order to generate ECDH secret encryption keys.",
                     iv: null,
@@ -60,10 +61,11 @@ const Encryptor = ({ children }) => {
         });
         setSecretKey(secretKey);
         console.log("SECRET AES KEY GENERATED!:: ", secretKey);
-        connection.emit("sendMessage", {
+        connection.emit("loggingMessage", {
             username: user.username,
             room_id: user.room_id,
             message: {
+                type: "log",
                 encrypted: false,
                 value: "public keys exchanged - end-to-end encryption initialized.",
                 iv: null,
