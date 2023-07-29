@@ -80,3 +80,7 @@ If you like this project, please consider giving it a ⭐ on [Github](https://gi
 ## License 📄
 
 This project is licensed under the MIT License.
+
+---
+
+<p align="center">Made with ❤️ by Shinno Taguchi</p>
