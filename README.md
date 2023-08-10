@@ -1,6 +1,10 @@
 # Paranoia
 
 <p align="center">
+  <strong>WARNING: **WORK IN PROGRESS** - super unclean code...</strong>
+</p>
+
+<p align="center">
   <strong>Paranoia is a web-based, end-to-end encrypted, database-less, anonymous chat application.</strong>
 </p>
 
